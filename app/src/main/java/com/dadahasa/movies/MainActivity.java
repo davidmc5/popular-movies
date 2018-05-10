@@ -1,12 +1,19 @@
 package com.dadahasa.movies;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.Image;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 
 import com.dadahasa.movies.model.Movie;
 import com.dadahasa.movies.model.MovieResponse;
@@ -19,7 +26,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     MainAdapter mAdapter;
     private RecyclerView mRecyclerView = null;
@@ -31,8 +38,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String BASE_URL = "http://api.themoviedb.org/3/";
     private static Retrofit retrofit = null;
 
-
-
+    //SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
 
 
     @Override
@@ -68,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
         MovieApiService movieApiService = retrofit.create(MovieApiService.class);
 
+        //Select the ranking (most popular or top rated
         Call<MovieResponse> call = movieApiService.getTopRatedMovies(API_KEY);
 
         call.enqueue(new Callback<MovieResponse>() {
@@ -83,6 +90,44 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, throwable.toString());
             }
         });
+    }
+
+    //the following two methods are to create the ranking selector (most popular / top rated)
+    // and to respond to clicks
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.ranking, menu);
+        //menu.findItem(R.id.sort_setting).setVisible(true);
+        return true;
+        //return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            case R.id.sort_setting:
+                // User chose the "Settings" item, show the app settings UI...
+
+                if (item.getTitle().toString().equals(getString(R.string.most_popular))) {
+                    item.setTitle(getString(R.string.top_rated));
+                    return true;
+                }
+                else {
+                    item.setTitle(getString(R.string.most_popular));
+                    return true;
+                }
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+        }
+
+
+
     }
 }
 

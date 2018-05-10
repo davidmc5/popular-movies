@@ -1,22 +1,21 @@
-# Popular Movies - Stage 1
+# Popular Movies
 
 ## Project Overview
 Build an app to allow users to discover the most popular movies playing. 
 
 ## Why this Project
 
-By building this app, you will demonstrate your understanding of the foundational elements of programming for Android. Your app will communicate with the Internet and provide a responsive and delightful user experience.
+Building this app requires understanding of the foundational elements of programming for Android. This app communicates with the Internet and provides a responsive and delightful user experience.
 
 
-## What Will I Learn?
+## Main goals
 
-- You will fetch data from the Internet with the MovieDB API.
-- You will use adapters and custom list layouts to populate list views.
-- You will incorporate libraries to simplify the amount of code you need to write
+- Fetch data from the Internet with the MovieDB API.
+- Use adapters and custom list layouts to populate list views.
+- Incorporate libraries to simplify the amount of code.
 
 
-
-## How Do I Complete this Project?
+## Main implementation steps
 
 - Build a UI layout for multiple Activities.
 - Launch these Activities via Intent.
@@ -26,7 +25,7 @@ By building this app, you will demonstrate your understanding of the foundationa
 
 - This app requires a key to access the API of The Movie Database (TMDb).
 - Obtain your personal key from [The Movie DB](https://www.themoviedb.org/account/signup)
-- This key is an alphanumeric string stored in a string in the `app/res/values/keys.xml` file:
+- This key is an alphanumeric string stored in a string in the `keys.xml` file. Create this file in the `app/res/values/' directory, add the `<resources>` section stated below and replace `paste_your_key_here` with your alphanumeric key.
 
 ```
 <resources>

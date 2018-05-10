@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="top_rated"
+        android:title="Top Rated"/>
+    <ListPreference
+        android:key="most_popular"
+        android:title="Most Popular"/>
+
+
+</PreferenceScreen>
