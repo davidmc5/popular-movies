@@ -31,14 +31,15 @@ public class MainActivity extends AppCompatActivity{
     MainAdapter mAdapter;
     private RecyclerView mRecyclerView = null;
 
-    //RecyclerView.LayoutManager mLayoutManager;
-
     //for retrieving movie data
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final String BASE_URL = "http://api.themoviedb.org/3/";
     private static Retrofit retrofit = null;
 
-    //SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+    //to store selected option (most popular or top rated)
+    SharedPreferences pref;
+    String myPreference;
+    public static final String SORT_KEY = "sortKey";
 
 
     @Override
@@ -53,6 +54,21 @@ public class MainActivity extends AppCompatActivity{
         // use a gridlayout manager
         int numberOfColumns = 2;
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
+
+        //store selected sorting option (most popular or top rated)
+        pref = this.getPreferences(Context.MODE_PRIVATE);
+
+        //retrieve myPreference or, if null, set the default to most_popular
+        myPreference = pref.getString(SORT_KEY, getString(R.string.most_popular));
+
+
+
+        //store preference in case originally null
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(SORT_KEY, myPreference);
+        editor.apply();
+
+
 
         //for API
         connectAndGetApiData();
@@ -97,11 +113,13 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
+        //need to inflate the sort-by menu item to toggle its label
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.ranking, menu);
-        //menu.findItem(R.id.sort_setting).setVisible(true);
+        MenuItem mMenu = menu.findItem(R.id.sort_setting);
+
+        mMenu.setTitle(myPreference);
         return true;
-        //return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -109,16 +127,20 @@ public class MainActivity extends AppCompatActivity{
         switch (item.getItemId()) {
 
             case R.id.sort_setting:
-                // User chose the "Settings" item, show the app settings UI...
+                // User clicked at the "sorted by" item, toggle the sort criteria
 
                 if (item.getTitle().toString().equals(getString(R.string.most_popular))) {
-                    item.setTitle(getString(R.string.top_rated));
-                    return true;
+                    myPreference = getString(R.string.top_rated);
                 }
                 else {
-                    item.setTitle(getString(R.string.most_popular));
-                    return true;
+                    myPreference = getString(R.string.most_popular);
                 }
+                item.setTitle(myPreference);
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putString(SORT_KEY, myPreference);
+                editor.apply();
+                return true;
+
 
             default:
                 // If we got here, the user's action was not recognized.
