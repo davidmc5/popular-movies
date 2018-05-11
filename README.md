@@ -19,13 +19,13 @@ Building this app requires understanding of the foundational elements of program
 
 - Build a UI layout for multiple Activities.
 - Launch these Activities via Intent.
-- Fetch data from the movieDB API
+- Fetch data from The MovieDB API.
 
 ## Requirements to compile the app
 
 - This app requires a key to access the API of The Movie Database (TMDb).
 - Obtain your personal key from [The Movie DB](https://www.themoviedb.org/account/signup)
-- This key is an alphanumeric string stored in a string in the `keys.xml` file. Create this file in the `app/res/values/' directory, add the `<resources>` section stated below and replace `paste_your_key_here` with your alphanumeric key.
+- The key is an alphanumeric string stored in the `keys.xml` file. Create this file in the `app/res/values/` directory, add the `<resources>` section stated below and replace `paste_your_key_here` with your alphanumeric key.
 
 ```
 <resources>

@@ -89,9 +89,18 @@ public class MainActivity extends AppCompatActivity{
         }
 
         MovieApiService movieApiService = retrofit.create(MovieApiService.class);
+        Call<MovieResponse> call;
 
-        //Select the ranking (most popular or top rated
-        Call<MovieResponse> call = movieApiService.getTopRatedMovies(API_KEY);
+        //Set the sort order based on myPreference (most popular or top rated)
+        if (myPreference.equals(getString(R.string.top_rated))){
+            call = movieApiService.getTopRatedMovies(API_KEY);
+        }else{
+            call = movieApiService.getPopularMovies(API_KEY);
+        }
+
+
+
+        //Call<MovieResponse> call = movieApiService.getPopularMovies(API_KEY);
 
         call.enqueue(new Callback<MovieResponse>() {
             @Override
