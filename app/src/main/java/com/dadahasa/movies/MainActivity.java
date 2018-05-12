@@ -1,19 +1,16 @@
 package com.dadahasa.movies;
 
-import android.content.Context;
+
 import android.content.SharedPreferences;
-import android.media.Image;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.dadahasa.movies.model.Movie;
 import com.dadahasa.movies.model.MovieResponse;
@@ -26,7 +23,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     MainAdapter mAdapter;
     private RecyclerView mRecyclerView = null;
@@ -37,7 +34,7 @@ public class MainActivity extends AppCompatActivity{
     private static Retrofit retrofit = null;
 
     //to store selected option (most popular or top rated)
-    SharedPreferences pref;
+    private SharedPreferences pref;
     String myPreference;
     public static final String SORT_KEY = "sortKey";
 
@@ -47,40 +44,42 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         //set recyclerView
         mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
 
-        // use a gridlayout manager
+        // use a gridlayout manager with two columns
         int numberOfColumns = 2;
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
 
-        //store selected sorting option (most popular or top rated)
-        pref = this.getPreferences(Context.MODE_PRIVATE);
+        //save selected sorting option (most popular or top rated)
+        //first get a reference to the default shared preferences file
+        pref =  PreferenceManager.getDefaultSharedPreferences(this);
 
-        //retrieve myPreference or, if null, set the default to most_popular
+        //retrieve the current preference value or, if null, set initial value to most_popular
         myPreference = pref.getString(SORT_KEY, getString(R.string.most_popular));
 
-
-
-        //store preference in case originally null
+        //store preference back in case it was originally null
         SharedPreferences.Editor editor = pref.edit();
         editor.putString(SORT_KEY, myPreference);
         editor.apply();
 
-
-
-        //for API
+        //Retrieve movie database data
         connectAndGetApiData();
     }
 
 
+    // Method to retrieve movie database data
     // This method creates an instance of Retrofit
     public void connectAndGetApiData(){
 
         //retrieve the key for the TMDb service
+        //the key is stored as a string in an XML file set in .gitignore
         final String API_KEY = getString(R.string.tmdb_key);
 
+        //create an instance of the API using retrofit
+        // this instance will handle the REST/JSON requests to the TMDb service
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
@@ -88,6 +87,8 @@ public class MainActivity extends AppCompatActivity{
                     .build();
         }
 
+        //use the methods of the MovieApiService interface to get movie data
+        //sorted according to the user's preference
         MovieApiService movieApiService = retrofit.create(MovieApiService.class);
         Call<MovieResponse> call;
 
@@ -97,10 +98,6 @@ public class MainActivity extends AppCompatActivity{
         }else{
             call = movieApiService.getPopularMovies(API_KEY);
         }
-
-
-
-        //Call<MovieResponse> call = movieApiService.getPopularMovies(API_KEY);
 
         call.enqueue(new Callback<MovieResponse>() {
             @Override
@@ -118,7 +115,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     //the following two methods are to create the ranking selector (most popular / top rated)
-    // and to respond to clicks
+    //displayed as a the preference in the actionBar, and to respond to clicks
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
@@ -126,7 +123,6 @@ public class MainActivity extends AppCompatActivity{
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.ranking, menu);
         MenuItem mMenu = menu.findItem(R.id.sort_setting);
-
         mMenu.setTitle(myPreference);
         return true;
     }
@@ -137,7 +133,6 @@ public class MainActivity extends AppCompatActivity{
 
             case R.id.sort_setting:
                 // User clicked at the "sorted by" item, toggle the sort criteria
-
                 if (item.getTitle().toString().equals(getString(R.string.most_popular))) {
                     myPreference = getString(R.string.top_rated);
                 }
@@ -148,17 +143,16 @@ public class MainActivity extends AppCompatActivity{
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putString(SORT_KEY, myPreference);
                 editor.apply();
-                return true;
 
+                //grab and display a new set of posters sort-by the new criteria
+                connectAndGetApiData();
+                return true;
 
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
         }
-
-
-
     }
 }
 
