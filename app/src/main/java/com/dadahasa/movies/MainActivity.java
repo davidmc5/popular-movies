@@ -1,6 +1,7 @@
 package com.dadahasa.movies;
 
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.dadahasa.movies.model.Movie;
 import com.dadahasa.movies.model.MovieResponse;
@@ -23,7 +25,8 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+implements MainAdapter.MovieClickListener {
 
     MainAdapter mAdapter;
     private RecyclerView mRecyclerView = null;
@@ -33,10 +36,15 @@ public class MainActivity extends AppCompatActivity {
     public static final String BASE_URL = "http://api.themoviedb.org/3/";
     private static Retrofit retrofit = null;
 
+    List<Movie> movieList;
+
     //to store selected option (most popular or top rated)
     private SharedPreferences pref;
     String myPreference;
     public static final String SORT_KEY = "sortKey";
+
+    //for testing purposes
+    Toast mToast;
 
 
     @Override
@@ -64,6 +72,11 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = pref.edit();
         editor.putString(SORT_KEY, myPreference);
         editor.apply();
+
+        //set recyclerView with the adapter and click listener
+        //MainAdapter(Context context, List<Movie> movies, MainAdapter.MovieClickListener listener)
+        mAdapter = new MainAdapter(getApplicationContext(), movieList,this );
+        mRecyclerView.setAdapter(mAdapter);
 
         //Retrieve movie database data
         getApiData();
@@ -102,11 +115,14 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<MovieResponse>() {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
-                List<Movie> movies = response.body().getResults();
-                mAdapter = new MainAdapter(getApplicationContext(), movies);
-                mRecyclerView.setAdapter(mAdapter);
-                Log.d(TAG, "Number of movies received: " + movies.size());
+                movieList = response.body().getResults();
+                //mAdapter = new MainAdapter(getApplicationContext(), movieList, getApplicationContext());
+                //mRecyclerView.setAdapter(mAdapter);
+                //mAdapter.notifyDataSetChanged();
+                mAdapter.addData(movieList);
+                Log.d(TAG, "Number of movies received: " + movieList.size());
             }
+
             @Override
             public void onFailure(Call<MovieResponse> call, Throwable throwable) {
                 Log.e(TAG, throwable.toString());
@@ -153,6 +169,14 @@ public class MainActivity extends AppCompatActivity {
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onMovieClick(int clickedMovieIndex) {
+        //show a test toast
+        String toastMessage = "Item #" + clickedMovieIndex + " clicked.";
+        mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT);
+        mToast.show();
     }
 }
 

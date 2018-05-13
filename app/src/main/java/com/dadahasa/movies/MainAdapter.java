@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 
 import com.dadahasa.movies.model.Movie;
 import com.squareup.picasso.Picasso;
@@ -16,49 +15,51 @@ import java.util.List;
 
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 
-    //private Image[] mImages = new Image[0];
-    private List<Movie> movies;
-
-
-
-
-    //private LayoutInflater mInflater;
-    private ItemClickListener mClickListener;
+    private List<Movie> movieList;
+    //private ItemClickListener mClickListener;
 
     //used for picasso calls
     private Context context;
     public static final String IMAGE_URL_BASE_PATH = "http://image.tmdb.org/t/p/w342//";
 
+    //reference for the listener interface
+    final private MovieClickListener mOnClickListener;
+
+
+    //interface for the click listener
+    public interface MovieClickListener {
+        void onMovieClick(int clickedMovieIndex);
+    }
 
     //Constructor to pass the image files
-    //MainAdapter(Context context, Image[] images){
-    MainAdapter(Context context, List<Movie> movies){
-        //this.mImages = images;
-        this.movies = movies;
+    MainAdapter(Context context, List<Movie> movieList, MovieClickListener listener){
         this.context = context;
+        this.movieList = movieList;
+        this.mOnClickListener = listener;
     }
 
 
 
-    //A view holder object will display a single image cell to view (creating new views or reusing hidden ones)
+    //A view holder object will display a single image cell to view
+    // (creating new views or reusing hidden ones)
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         ImageView mImageView;
         //private LayoutInflater mInflater;
         //private ItemClickListener mClickListener;
 
-        public ViewHolder(View view) {
-            super(view);
-            mImageView = view.findViewById(R.id.imageView);
-            view.setOnClickListener(this);
+        public ViewHolder(View itemView) {
+            super(itemView);
+            mImageView = itemView.findViewById(R.id.imageView);
+            itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            if (mClickListener != null){
-                mClickListener.onItemClick(view, getAdapterPosition());
+            if (mOnClickListener != null){
+                int movieIndex = getAdapterPosition();
+                mOnClickListener.onMovieClick(movieIndex);
             }
-
         }
     }
 
@@ -85,7 +86,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
 
-        String image_url = IMAGE_URL_BASE_PATH + movies.get(position).getPosterPath();
+        String image_url = IMAGE_URL_BASE_PATH + movieList.get(position).getPosterPath();
 
         Picasso.with(context)
                 .load(image_url)
@@ -100,7 +101,8 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return movies.size();
+        if (movieList == null){return 0;}
+        return movieList.size();
     }
 
     @Override
@@ -108,14 +110,23 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
         return R.layout.recyclerview_item;
     }
 
+    /*
 
     public interface ItemClickListener {
         void onItemClick(View view, int position);
     }
 
+
     // Used by MainActivity's onCreate to attach a click listener to recyclerView
     void setClickListener(ItemClickListener itemClickListener) {
-        this.mClickListener = itemClickListener;
+    //    this.mClickListener = itemClickListener;
     }
+    */
 
+    //method to update the adapter when the movie list changes
+    //this is called by the retrofit method onResponse when new API data is fetched
+    public void addData(List<Movie> movieList) {
+        this.movieList= movieList;
+        notifyDataSetChanged();
+    }
 }
