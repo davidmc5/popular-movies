@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.dadahasa.movies.model.Movie;
 import com.squareup.picasso.Picasso;
@@ -91,7 +92,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
                 .placeholder(R.drawable.popcorn)
                 .error(R.drawable.popcorn)
                 //.resize(50, 50).centerCrop()
-                //.fit().centerCrop()
+                .fit().centerInside()
                 .into(viewHolder.mImageView);
     }
 

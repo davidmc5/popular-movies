@@ -5,7 +5,6 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
 <item
     android:id="@+id/sort_setting"
     app:showAsAction="ifRoom"
-    android:title="MOST POPULAR"
     />
 
 </menu>

@@ -66,13 +66,13 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
 
         //Retrieve movie database data
-        connectAndGetApiData();
+        getApiData();
     }
 
 
     // Method to retrieve movie database data
     // This method creates an instance of Retrofit
-    public void connectAndGetApiData(){
+    public void getApiData(){
 
         //retrieve the key for the TMDb service
         //the key is stored as a string in an XML file set in .gitignore
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
 
             case R.id.sort_setting:
-                // User clicked at the "sorted by" item, toggle the sort criteria
+                // User clicked at the "sorted by" item. Toggle sort criteria
                 if (item.getTitle().toString().equals(getString(R.string.most_popular))) {
                     myPreference = getString(R.string.top_rated);
                 }
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 editor.apply();
 
                 //grab and display a new set of posters sort-by the new criteria
-                connectAndGetApiData();
+                getApiData();
                 return true;
 
             default:
