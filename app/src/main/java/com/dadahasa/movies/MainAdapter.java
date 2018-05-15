@@ -45,8 +45,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         ImageView mImageView;
-        //private LayoutInflater mInflater;
-        //private ItemClickListener mClickListener;
+
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -110,18 +109,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
         return R.layout.recyclerview_item;
     }
 
-    /*
-
-    public interface ItemClickListener {
-        void onItemClick(View view, int position);
-    }
-
-
-    // Used by MainActivity's onCreate to attach a click listener to recyclerView
-    void setClickListener(ItemClickListener itemClickListener) {
-    //    this.mClickListener = itemClickListener;
-    }
-    */
 
     //method to update the adapter when the movie list changes
     //this is called by the retrofit method onResponse when new API data is fetched

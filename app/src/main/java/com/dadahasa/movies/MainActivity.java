@@ -2,6 +2,7 @@ package com.dadahasa.movies;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 import com.dadahasa.movies.model.Movie;
 import com.dadahasa.movies.model.MovieResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -36,7 +38,7 @@ implements MainAdapter.MovieClickListener {
     public static final String BASE_URL = "http://api.themoviedb.org/3/";
     private static Retrofit retrofit = null;
 
-    List<Movie> movieList;
+    private List<Movie> movieList;
 
     //to store selected option (most popular or top rated)
     private SharedPreferences pref;
@@ -80,6 +82,7 @@ implements MainAdapter.MovieClickListener {
 
         //Retrieve movie database data
         getApiData();
+
     }
 
 
@@ -116,9 +119,6 @@ implements MainAdapter.MovieClickListener {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
                 movieList = response.body().getResults();
-                //mAdapter = new MainAdapter(getApplicationContext(), movieList, getApplicationContext());
-                //mRecyclerView.setAdapter(mAdapter);
-                //mAdapter.notifyDataSetChanged();
                 mAdapter.addData(movieList);
                 Log.d(TAG, "Number of movies received: " + movieList.size());
             }
@@ -177,6 +177,25 @@ implements MainAdapter.MovieClickListener {
         String toastMessage = "Item #" + clickedMovieIndex + " clicked.";
         mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT);
         mToast.show();
+
+
+        //Open movie detail activity
+        Intent startDetailActivityIntent = new Intent(this, DetailActivity.class);
+
+        //put the movie index in extras
+        startDetailActivityIntent.putExtra(Intent.EXTRA_TEXT, Integer.toString(clickedMovieIndex) );
+
+        startDetailActivityIntent.putExtra("movieIndex", clickedMovieIndex );
+
+        //startDetailActivityIntent.putStringArrayListExtra("movieList", movieList );
+
+
+        //start detail activity
+        startActivity(startDetailActivityIntent);
+
+        //ArrayList<String> movieDetail = new ArrayList<>();
+       // private ArrayList<String> getMovieDetail(List<Movie> movieList, int movieIndex){
+
     }
 }
 
