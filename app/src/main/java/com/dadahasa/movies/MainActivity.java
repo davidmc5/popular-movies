@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.dadahasa.movies.model.Movie;
 import com.dadahasa.movies.model.MovieResponse;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -173,28 +174,33 @@ implements MainAdapter.MovieClickListener {
 
     @Override
     public void onMovieClick(int clickedMovieIndex) {
+        /*
         //show a test toast
         String toastMessage = "Item #" + clickedMovieIndex + " clicked.";
         mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT);
         mToast.show();
+        */
 
 
         //Open movie detail activity
         Intent startDetailActivityIntent = new Intent(this, DetailActivity.class);
 
-        //put the movie index in extras
-        startDetailActivityIntent.putExtra(Intent.EXTRA_TEXT, Integer.toString(clickedMovieIndex) );
+        // Get the movie clicked
+        Movie movieClicked = movieList.get(clickedMovieIndex);
 
-        startDetailActivityIntent.putExtra("movieIndex", clickedMovieIndex );
+        /*
+        //get the movie ID
+        String movieId = Integer.toString(movieClicked.getId());
+        startDetailActivityIntent.putExtra("ID", movieId);
+        */
 
-        //startDetailActivityIntent.putStringArrayListExtra("movieList", movieList );
-
+        Gson gson = new Gson();
+        String movieJson = gson.toJson(movieClicked);
+        startDetailActivityIntent.putExtra("MOVIE", movieJson);
 
         //start detail activity
         startActivity(startDetailActivityIntent);
 
-        //ArrayList<String> movieDetail = new ArrayList<>();
-       // private ArrayList<String> getMovieDetail(List<Movie> movieList, int movieIndex){
 
     }
 }
