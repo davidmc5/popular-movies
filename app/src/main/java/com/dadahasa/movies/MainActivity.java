@@ -1,8 +1,10 @@
 package com.dadahasa.movies;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +14,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.dadahasa.movies.model.Movie;
 import com.dadahasa.movies.model.MovieResponse;
@@ -28,7 +32,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity
 implements MainAdapter.MovieClickListener {
 
-    MainAdapter mAdapter;
+    MainAdapter mAdapter = null;
     private RecyclerView mRecyclerView = null;
 
     //for retrieving movie data
@@ -41,6 +45,8 @@ implements MainAdapter.MovieClickListener {
     //to store user selections
     private SharedPreferences pref;
     String myPreference; //(most popular or top rated)
+
+    private static boolean isFirstRun = true;
 
     public static final String SORT_KEY = "sortKey";
 
@@ -71,6 +77,14 @@ implements MainAdapter.MovieClickListener {
         editor.putString(SORT_KEY, myPreference);
         editor.apply();
 
+        if (isFirstRun){
+            //reset sharedpreferences
+            editor.putInt("SCROLL_POS", 0);
+            editor.putInt("SCROLL_OFFSET", 0);
+            editor.apply();
+            isFirstRun = false;
+        }
+
         //set recyclerView with the adapter and click listener
         if (mAdapter == null) {
             mAdapter = new MainAdapter(getApplicationContext(), movieList, this);
@@ -81,6 +95,34 @@ implements MainAdapter.MovieClickListener {
         }
     }
 
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        //save current recyclerview position
+        GridLayoutManager manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
+        int firstItem = manager.findFirstVisibleItemPosition();
+
+        if (firstItem != -1) {
+            View firstItemView = manager.findViewByPosition(firstItem);
+            float topOffset = firstItemView.getTop();
+
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putInt("SCROLL_POS", firstItem);
+            editor.putInt("SCROLL_OFFSET", (int) topOffset);
+            editor.apply();
+        }else{
+            noData();
+        }
+    }
+
+    public void noData(){
+        String toastMessage = "Data unavailable. Verify Wi-Fi/Cellular Network";
+        Toast mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_LONG);
+        mToast.show();
+    }
 
     // Method to retrieve movie database data
     // This method creates an instance of Retrofit
@@ -110,9 +152,6 @@ implements MainAdapter.MovieClickListener {
         }else{
             call = movieApiService.getPopularMovies(API_KEY);
         }
-        //when re-sorting, go back to show movie list from index 0
-        GridLayoutManager manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
-        manager.scrollToPosition(0);
 
         //Get the movie list into an array of movie objects according to our data model
         call.enqueue(new Callback<MovieResponse>() {
@@ -121,14 +160,24 @@ implements MainAdapter.MovieClickListener {
                 movieList = response.body().getResults();
                 mAdapter.addData(movieList);
                 Log.d(TAG, "Number of movies received: " + movieList.size());
+
+                //scroll view to last visible position
+                int scrollPos = pref.getInt("SCROLL_POS", 0);
+                int scrollOffset = pref.getInt("SCROLL_OFFSET", 0);
+
+                GridLayoutManager manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
+                manager.scrollToPositionWithOffset(scrollPos, scrollOffset);
             }
 
             @Override
             public void onFailure(Call<MovieResponse> call, Throwable throwable) {
                 Log.e(TAG, throwable.toString());
+                noData();
             }
         });
     }
+
+
 
     //the following two methods are to create the ranking selector (most popular / top rated)
     //displayed as a the preference in the actionBar, and to respond to clicks
@@ -159,6 +208,11 @@ implements MainAdapter.MovieClickListener {
                 editor.putString(SORT_KEY, myPreference);
                 editor.apply();
 
+                //since we re-sorted, display from the top of view 0
+                editor.putInt("SCROLL_POS", 0);
+                editor.putInt("SCROLL_OFFSET", 0);
+                editor.apply();
+
                 //grab and display a new set of posters sort-by the new criteria
                 getApiData();
                 return true;
@@ -172,6 +226,18 @@ implements MainAdapter.MovieClickListener {
 
     @Override
     public void onMovieClick(int clickedMovieIndex) {
+
+        //Fix display issue
+        //when last movie is selected for detail,
+        // going back to the list displays the previous movie
+        if (clickedMovieIndex > mRecyclerView.getAdapter().getItemCount()-2) {
+
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putInt("SCROLL_POS", clickedMovieIndex);
+            editor.putInt("SCROLL_OFFSET", 0);
+            editor.apply();
+        }
+
 
         //Open movie detail activity
         Intent startDetailActivityIntent = new Intent(this, DetailActivity.class);
