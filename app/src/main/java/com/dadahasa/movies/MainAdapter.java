@@ -38,14 +38,11 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
         this.mOnClickListener = listener;
     }
 
-
-
     //A view holder object will display a single image cell to view
     // (creating new views or reusing hidden ones)
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         ImageView mImageView;
-
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -78,7 +75,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
     }
 
 
-
     //binds data to each cell's image based on the adapter position
     //Called when recyclerView needs to populate the view with data from the model.
     //It binds the given view holder to the data source every time the recycler needs to display a view.
@@ -91,12 +87,9 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
                 .load(image_url)
                 .placeholder(R.drawable.popcorn)
                 .error(R.drawable.popcorn)
-                //.resize(50, 50).centerCrop()
                 .fit().centerInside()
                 .into(viewHolder.mImageView);
     }
-
-
 
     @Override
     public int getItemCount() {
@@ -113,7 +106,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
     //method to update the adapter when the movie list changes
     //this is called by the retrofit method onResponse when new API data is fetched
     public void addData(List<Movie> movieList) {
-        this.movieList= movieList;
+        this.movieList = movieList;
         notifyDataSetChanged();
     }
 }

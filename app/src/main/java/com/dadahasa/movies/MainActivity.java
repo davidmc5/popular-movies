@@ -1,7 +1,6 @@
 package com.dadahasa.movies;
 
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -13,13 +12,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.dadahasa.movies.model.Movie;
 import com.dadahasa.movies.model.MovieResponse;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -41,13 +38,11 @@ implements MainAdapter.MovieClickListener {
 
     private List<Movie> movieList;
 
-    //to store selected option (most popular or top rated)
+    //to store user selections
     private SharedPreferences pref;
-    String myPreference;
-    public static final String SORT_KEY = "sortKey";
+    String myPreference; //(most popular or top rated)
 
-    //for testing purposes
-    Toast mToast;
+    public static final String SORT_KEY = "sortKey";
 
 
     @Override
@@ -77,13 +72,13 @@ implements MainAdapter.MovieClickListener {
         editor.apply();
 
         //set recyclerView with the adapter and click listener
-        //MainAdapter(Context context, List<Movie> movies, MainAdapter.MovieClickListener listener)
-        mAdapter = new MainAdapter(getApplicationContext(), movieList,this );
-        mRecyclerView.setAdapter(mAdapter);
+        if (mAdapter == null) {
+            mAdapter = new MainAdapter(getApplicationContext(), movieList, this);
+            mRecyclerView.setAdapter(mAdapter);
 
-        //Retrieve movie database data
-        getApiData();
-
+            //Retrieve movie database data
+            getApiData();
+        }
     }
 
 
@@ -115,7 +110,11 @@ implements MainAdapter.MovieClickListener {
         }else{
             call = movieApiService.getPopularMovies(API_KEY);
         }
+        //when re-sorting, go back to show movie list from index 0
+        GridLayoutManager manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
+        manager.scrollToPosition(0);
 
+        //Get the movie list into an array of movie objects according to our data model
         call.enqueue(new Callback<MovieResponse>() {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
@@ -133,7 +132,6 @@ implements MainAdapter.MovieClickListener {
 
     //the following two methods are to create the ranking selector (most popular / top rated)
     //displayed as a the preference in the actionBar, and to respond to clicks
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         //need to inflate the sort-by menu item to toggle its label
@@ -174,13 +172,6 @@ implements MainAdapter.MovieClickListener {
 
     @Override
     public void onMovieClick(int clickedMovieIndex) {
-        /*
-        //show a test toast
-        String toastMessage = "Item #" + clickedMovieIndex + " clicked.";
-        mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT);
-        mToast.show();
-        */
-
 
         //Open movie detail activity
         Intent startDetailActivityIntent = new Intent(this, DetailActivity.class);
@@ -188,20 +179,12 @@ implements MainAdapter.MovieClickListener {
         // Get the movie clicked
         Movie movieClicked = movieList.get(clickedMovieIndex);
 
-        /*
-        //get the movie ID
-        String movieId = Integer.toString(movieClicked.getId());
-        startDetailActivityIntent.putExtra("ID", movieId);
-        */
-
         Gson gson = new Gson();
         String movieJson = gson.toJson(movieClicked);
         startDetailActivityIntent.putExtra("MOVIE", movieJson);
 
         //start detail activity
         startActivity(startDetailActivityIntent);
-
-
     }
 }
 

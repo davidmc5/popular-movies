@@ -10,9 +10,6 @@ import com.dadahasa.movies.model.Movie;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
-//import static com.dadahasa.movies.MainAdapter.IMAGE_URL_BASE_PATH;
-
-
 public class DetailActivity extends AppCompatActivity {
 
     private TextView mTitle;
@@ -27,7 +24,6 @@ public class DetailActivity extends AppCompatActivity {
     private String movieId;
 
     private static final String IMAGE_URL_BASE_PATH = "http://image.tmdb.org/t/p/w342//";
-    //private static final String IMAGE_URL_BASE_PATH = "http://image.tmdb.org/t/p/w92//";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +45,6 @@ public class DetailActivity extends AppCompatActivity {
             movieJson = intentThatStartedThisActivity.getStringExtra("MOVIE");
         }
 
-        /*
-        if (intentThatStartedThisActivity.hasExtra("ID")) {
-            movieId = intentThatStartedThisActivity.getStringExtra("ID");
-        }
-        */
-
-
         Gson gson = new Gson();
         Movie movieClicked = gson.fromJson(movieJson, Movie.class);
 
@@ -75,16 +64,12 @@ public class DetailActivity extends AppCompatActivity {
         mOverview.setText(movieClicked.getOverview());
 
         String image_url = IMAGE_URL_BASE_PATH + movieClicked.getPosterPath();
-        //String image_url = IMAGE_URL_BASE_PATH + movieClicked.getBackdropPath();
 
         Picasso.with(this)
                 .load(image_url)
                 .placeholder(R.drawable.popcorn)
                 .error(R.drawable.popcorn)
-                //.resize(200, 0).centerInside()
                 .fit().centerInside()
                 .into(mPoster);
-
     }
-
 }
