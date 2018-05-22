@@ -1,10 +1,10 @@
 package com.dadahasa.movies;
 
 
-import android.content.Context;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Parcelable;
+
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,7 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
+
 import android.widget.Toast;
 
 import com.dadahasa.movies.model.Movie;
@@ -46,6 +46,8 @@ implements MainAdapter.MovieClickListener {
     private SharedPreferences pref;
     String myPreference; //(most popular or top rated)
 
+    GridLayoutManager manager;
+
     private static boolean isFirstRun = true;
 
     public static final String SORT_KEY = "sortKey";
@@ -72,15 +74,14 @@ implements MainAdapter.MovieClickListener {
         //retrieve the current preference value or, if null, set initial value to most_popular
         myPreference = pref.getString(SORT_KEY, getString(R.string.most_popular));
 
-        //store preference back in case it was originally null
+        //store sorting preference back in case it was originally null
         SharedPreferences.Editor editor = pref.edit();
         editor.putString(SORT_KEY, myPreference);
         editor.apply();
 
         if (isFirstRun){
-            //reset sharedpreferences
+            //reset sharedPreferences when the app starts for the first time
             editor.putInt("SCROLL_POS", 0);
-            editor.putInt("SCROLL_OFFSET", 0);
             editor.apply();
             isFirstRun = false;
         }
@@ -100,21 +101,112 @@ implements MainAdapter.MovieClickListener {
     @Override
     protected void onPause() {
         super.onPause();
-
-        //save current recyclerview position
-        GridLayoutManager manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
+        //save current recyclerView position
+        manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
         int firstItem = manager.findFirstVisibleItemPosition();
 
         if (firstItem != -1) {
-            View firstItemView = manager.findViewByPosition(firstItem);
-            float topOffset = firstItemView.getTop();
-
+            //Preserve first visible view in case of device rotation
+            //to be able to scroll back the the current visible row
             SharedPreferences.Editor editor = pref.edit();
             editor.putInt("SCROLL_POS", firstItem);
-            editor.putInt("SCROLL_OFFSET", (int) topOffset);
             editor.apply();
         }else{
+            //We couldn't retrieve data
             noData();
+        }
+    }
+
+
+
+    //the following two methods are to create the sorting selector (most popular / top rated)
+    //display as a the preference in the actionBar, and to respond to clicks
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        //need to inflate the sort-by menu item to toggle its label
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.ranking, menu);
+        MenuItem mMenu = menu.findItem(R.id.sort_setting);
+        mMenu.setTitle(myPreference);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            case R.id.sort_setting:
+                // User clicked at the "sorted by" item. Toggle sort criteria
+                if (item.getTitle().toString().equals(getString(R.string.most_popular))) {
+                    myPreference = getString(R.string.top_rated);
+                }
+                else {
+                    myPreference = getString(R.string.most_popular);
+                }
+                item.setTitle(myPreference);
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putString(SORT_KEY, myPreference);
+                editor.apply();
+
+                //since we re-sorted, display from the top,  view index 0
+                editor.putInt("SCROLL_POS", 0);
+                editor.apply();
+
+                //grab and display a new set of posters sort-by the new criteria
+                getApiData();
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onMovieClick(int clickedMovieIndex) {
+
+        //save the position index that was clicked
+        //to scroll back to the same movie list row
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt("CLICKED_POS", clickedMovieIndex);
+        editor.apply();
+
+
+        //Start movie detail activity
+        //convert the selected movie object to JSON to pass it to the detail activity via intent
+        Movie movieClicked = movieList.get(clickedMovieIndex);
+        Gson gson = new Gson();
+        String movieJson = gson.toJson(movieClicked);
+
+        //create intent sending the movie object as extra
+        Intent startDetailActivityIntent = new Intent(this, DetailActivity.class);
+        startDetailActivityIntent.putExtra("MOVIE", movieJson);
+
+        //start detail activity
+        //We use the "forResult" version to call onActivityResults to set the movie clicked
+        startActivityForResult(startDetailActivityIntent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // Check which request we're responding to
+        if (requestCode == 1) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                //store the adapter position for the movie clicked
+                // to scroll back to the same movie
+                //Since after a rotation MainActivity is recreated with a new adapter in position 0
+                // that zero index value got stored.
+                //we need to overwrite the previously stored adapter position
+                //with the position of the movie clicked
+
+                SharedPreferences.Editor editor = pref.edit();
+                int clickedPos = pref.getInt("CLICKED_POS", 0);
+                editor.putInt("SCROLL_POS", clickedPos);
+                editor.apply();
+            }
         }
     }
 
@@ -161,12 +253,10 @@ implements MainAdapter.MovieClickListener {
                 mAdapter.addData(movieList);
                 Log.d(TAG, "Number of movies received: " + movieList.size());
 
-                //scroll view to last visible position
+                //restore previously visible position (before a rotation or detail view)
                 int scrollPos = pref.getInt("SCROLL_POS", 0);
-                int scrollOffset = pref.getInt("SCROLL_OFFSET", 0);
-
                 GridLayoutManager manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
-                manager.scrollToPositionWithOffset(scrollPos, scrollOffset);
+                manager.scrollToPosition(scrollPos);
             }
 
             @Override
@@ -176,82 +266,7 @@ implements MainAdapter.MovieClickListener {
             }
         });
     }
-
-
-
-    //the following two methods are to create the ranking selector (most popular / top rated)
-    //displayed as a the preference in the actionBar, and to respond to clicks
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        //need to inflate the sort-by menu item to toggle its label
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.ranking, menu);
-        MenuItem mMenu = menu.findItem(R.id.sort_setting);
-        mMenu.setTitle(myPreference);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-
-            case R.id.sort_setting:
-                // User clicked at the "sorted by" item. Toggle sort criteria
-                if (item.getTitle().toString().equals(getString(R.string.most_popular))) {
-                    myPreference = getString(R.string.top_rated);
-                }
-                else {
-                    myPreference = getString(R.string.most_popular);
-                }
-                item.setTitle(myPreference);
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putString(SORT_KEY, myPreference);
-                editor.apply();
-
-                //since we re-sorted, display from the top of view 0
-                editor.putInt("SCROLL_POS", 0);
-                editor.putInt("SCROLL_OFFSET", 0);
-                editor.apply();
-
-                //grab and display a new set of posters sort-by the new criteria
-                getApiData();
-                return true;
-
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onMovieClick(int clickedMovieIndex) {
-
-        //Fix display issue
-        //when last movie is selected for detail,
-        // going back to the list displays the previous movie
-        if (clickedMovieIndex > mRecyclerView.getAdapter().getItemCount()-2) {
-
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putInt("SCROLL_POS", clickedMovieIndex);
-            editor.putInt("SCROLL_OFFSET", 0);
-            editor.apply();
-        }
-
-
-        //Open movie detail activity
-        Intent startDetailActivityIntent = new Intent(this, DetailActivity.class);
-
-        // Get the movie clicked
-        Movie movieClicked = movieList.get(clickedMovieIndex);
-
-        Gson gson = new Gson();
-        String movieJson = gson.toJson(movieClicked);
-        startDetailActivityIntent.putExtra("MOVIE", movieJson);
-
-        //start detail activity
-        startActivity(startDetailActivityIntent);
-    }
 }
+
 
 

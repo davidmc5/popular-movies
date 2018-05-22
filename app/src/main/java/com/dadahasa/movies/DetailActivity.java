@@ -1,5 +1,6 @@
 package com.dadahasa.movies;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -71,5 +72,12 @@ public class DetailActivity extends AppCompatActivity {
                 .error(R.drawable.popcorn)
                 .fit().centerInside()
                 .into(mPoster);
+
+        //send flag back to main activity to indicate onCreate that
+        // it is returning from the detail activity.
+        //this returns the adapter to the same movie view that was clicked
+        Intent returnIntent = new Intent();
+        setResult(Activity.RESULT_OK, returnIntent);
+
     }
 }
