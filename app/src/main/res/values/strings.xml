@@ -3,4 +3,6 @@
     <string name="most_popular">MOST POPULAR</string>
     <string name="top_rated">TOP RATED</string>
 
+    <string name="rating_str">%1$.1f / 10</string>
+
 </resources>

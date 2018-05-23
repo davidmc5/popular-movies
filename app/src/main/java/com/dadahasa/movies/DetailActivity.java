@@ -2,6 +2,7 @@ package com.dadahasa.movies;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -22,7 +23,6 @@ public class DetailActivity extends AppCompatActivity {
 
 
     private String movieJson;
-    private String movieId;
 
     private static final String IMAGE_URL_BASE_PATH = "http://image.tmdb.org/t/p/w342//";
 
@@ -58,8 +58,10 @@ public class DetailActivity extends AppCompatActivity {
         mReleaseYear.setText(year);
 
         //Rating
-        String rating = movieClicked.getVoteAverage().toString();
-        mRating.setText(rating + " / 10");
+        double rating = movieClicked.getVoteAverage();
+        Resources res = getResources();
+        String ratingStr = String.format(res.getString(R.string.rating_str), rating);
+        mRating.setText(ratingStr);
 
         //Overview
         mOverview.setText(movieClicked.getOverview());
@@ -73,9 +75,8 @@ public class DetailActivity extends AppCompatActivity {
                 .fit().centerInside()
                 .into(mPoster);
 
-        //send flag back to main activity to indicate onCreate that
-        // it is returning from the detail activity.
-        //this returns the adapter to the same movie view that was clicked
+        //This is to flag main activity after returning from  a rotation/onCreate
+        // to set the new recreated adapter to show the same movie that was clicked
         Intent returnIntent = new Intent();
         setResult(Activity.RESULT_OK, returnIntent);
 
