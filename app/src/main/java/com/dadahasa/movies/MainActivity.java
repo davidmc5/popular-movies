@@ -216,6 +216,8 @@ implements MainAdapter.MovieClickListener {
         mToast.show();
     }
 
+
+
     // Method to retrieve movie database data
     // This method creates an instance of Retrofit
     public void getApiData(){

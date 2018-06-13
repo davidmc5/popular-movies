@@ -15,10 +15,10 @@ import java.util.List;
 
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 
+    //data source for the movie data retrieved from the TMDB API
     private List<Movie> movieList;
-    //private ItemClickListener mClickListener;
 
-    //used for picasso calls
+    //used for picasso calls to retrieve movie data
     private Context context;
     public static final String IMAGE_URL_BASE_PATH = "http://image.tmdb.org/t/p/w342//";
 
@@ -31,7 +31,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
         void onMovieClick(int clickedMovieIndex);
     }
 
-    //Constructor to pass the image files
+    //Constructor called by main activity to pass the image files and attach listener
     MainAdapter(Context context, List<Movie> movieList, MovieClickListener listener){
         this.context = context;
         this.movieList = movieList;
@@ -53,6 +53,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
         @Override
         public void onClick(View view) {
             if (mOnClickListener != null){
+                //if there is a listener, this will call the method onMovieClick on MainActivity
                 int movieIndex = getAdapterPosition();
                 mOnClickListener.onMovieClick(movieIndex);
             }
