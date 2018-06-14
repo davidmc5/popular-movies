@@ -1,19 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
-    android:padding="5dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/custom_border"
+    android:layout_margin="5dp"
     >
+
+    <!--  Play Icon on left side -->
+    <LinearLayout android:id="@+id/playIcon"
+        android:layout_width= "wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dip"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="5dip">
+
+        <ImageView
+            android:id="@+id/playIcon_image"
+            android:layout_width="100dip"
+            android:layout_height="100dip"
+            android:tint="@color/colorAccent"
+            app:srcCompat="@drawable/ic_playicon"
+            />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/trailerView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scaleType="centerInside"
-        android:padding="2dp"
-        android:text="Trailer"
-        android:layout_gravity="center_horizontal"
+        android:layout_height="match_parent"
+        android:layout_toRightOf="@+id/playIcon"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textSize="25dip"
         />
-</LinearLayout>
+<!-- https://stackoverflow.com/questions/432037/how-do-i-center-text-horizontally-and-vertically-in-a-textview?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa -->
+</RelativeLayout>
 
