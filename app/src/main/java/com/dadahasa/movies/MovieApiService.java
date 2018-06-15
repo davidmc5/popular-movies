@@ -1,6 +1,7 @@
 package com.dadahasa.movies;
 
 import com.dadahasa.movies.model.MovieResponse;
+import com.dadahasa.movies.model.ReviewResponse;
 import com.dadahasa.movies.model.TrailerResponse;
 
 import retrofit2.Call;
@@ -22,4 +23,7 @@ public interface MovieApiService {
 
     @GET("movie/{id}/videos")
     Call<TrailerResponse> getTrailers(@Path("id") int movieId, @Query("api_key") String apiKey);
+
+    @GET("movie/{id}/reviews")
+    Call<ReviewResponse> getReviews(@Path("id") int movieId, @Query("api_key") String apiKey);
 }

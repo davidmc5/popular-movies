@@ -13,6 +13,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dadahasa.movies.model.Movie;
+import com.dadahasa.movies.model.Review;
+import com.dadahasa.movies.model.ReviewResponse;
 import com.dadahasa.movies.model.Trailer;
 import com.dadahasa.movies.model.TrailerResponse;
 import com.google.gson.Gson;
@@ -40,6 +42,7 @@ implements TrailerAdapter.TrailerClickListener {
 
     private static Retrofit retrofit = null;
     private List<Trailer> trailerList;
+    private List<Review> reviewList;
     private int movieId;
 
 
@@ -50,6 +53,10 @@ implements TrailerAdapter.TrailerClickListener {
 
     TrailerAdapter trailerAdapter = null;
     private RecyclerView trailerRecyclerView = null;
+
+    ReviewAdapter reviewAdapter = null;
+    private RecyclerView reviewRecyclerView = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,27 +109,42 @@ implements TrailerAdapter.TrailerClickListener {
                 .into(mPoster);
 
         //*************************************************************
+        //Retrieve trailers AND reviews from API and place them into trailerList and reviewList.
         getTrailersData(movieId);
+
+        //TRAILERS
+        //********
+
         // Set the trailers' recycler view
-        trailerRecyclerView = findViewById(R.id.detail_recycler_view);
+        trailerRecyclerView = findViewById(R.id.trailers_recycler_view);
         trailerRecyclerView.setHasFixedSize(true);
+
 
         //use linearLayout Manager
         trailerRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false ));
 
         //set recyclerView with the adapter and click listener
-        //trailerRecyclerView.findViewHolderForAdapterPosition();
-        //Context context = trailerRecyclerView.viewHolder.context;
-
         if (trailerAdapter == null) {
             trailerAdapter = new TrailerAdapter(trailerList, this);
             trailerRecyclerView.setAdapter(trailerAdapter);
-
-            //Retrieve movie database data
-            //getApiData();
         }
 
+        //REVIEWS
+        //*******
 
+        // Set the reviews' recycler view
+        reviewRecyclerView = findViewById(R.id.reviews_recycler_view);
+        reviewRecyclerView.setHasFixedSize(true);
+
+
+        //use linearLayout Manager
+        reviewRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false ));
+
+        //set recyclerView with the adapter and click listener
+        if (reviewAdapter == null) {
+            reviewAdapter = new ReviewAdapter(reviewList);
+            reviewRecyclerView.setAdapter(reviewAdapter);
+        }
 
 
 
@@ -151,28 +173,52 @@ implements TrailerAdapter.TrailerClickListener {
                     .build();
         }
 
-        //call the method defined on the MovieApiService interface to get trailer data
+        //Create an instance of retrofit API service to place the calls
         MovieApiService movieApiService = retrofit.create(MovieApiService.class);
+
+
+        //GET TRAILERS
+        //declare the variable to get trailer data
         Call<TrailerResponse> call;
 
         //Get the trailers' data into an array of Trailer objects according to our data model
         call = movieApiService.getTrailers(movieId, API_KEY);
         call.enqueue(new Callback<TrailerResponse>() {
+
             @Override
             public void onResponse(Call<TrailerResponse> call, Response<TrailerResponse> response) {
                 trailerList = response.body().getResults();
                 trailerAdapter.addData(trailerList);
-
-                Log.d(TAG, "Number of trailers received: " + trailerList.size());
-
-                //restore previously visible position (before a rotation or detail view)
-                //int scrollPos = pref.getInt("SCROLL_POS", 0);
-                //GridLayoutManager manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
-                //manager.scrollToPosition(scrollPos);
             }
 
             @Override
             public void onFailure(Call<TrailerResponse> call, Throwable throwable) {
+                //Log.e(TAG, throwable.toString());
+                //noData();
+            }
+        });
+
+
+        //GET REVIEWS
+        //declare the variable to get review data
+        Call<ReviewResponse> reviews;
+
+
+        //Get the Reviews
+        //Get the trailers' data into an array of Trailer objects according to our data model
+        reviews = movieApiService.getReviews(movieId, API_KEY);
+        reviews.enqueue(new Callback<ReviewResponse>() {
+
+            @Override
+            public void onResponse(Call<ReviewResponse> call, Response<ReviewResponse> response) {
+                reviewList = response.body().getResults();
+                reviewAdapter.addData(reviewList);
+
+                Log.d(TAG, "Number of REVIEWS received: " + reviewList.size());
+            }
+
+            @Override
+            public void onFailure(Call<ReviewResponse> call, Throwable throwable) {
                 //Log.e(TAG, throwable.toString());
                 //noData();
             }

@@ -34,9 +34,13 @@
         android:layout_height="match_parent"
         android:layout_toRightOf="@+id/playIcon"
         android:gravity="center"
+        android:foregroundGravity="center"
         android:textAlignment="center"
         android:textSize="25dip"
         />
 <!-- https://stackoverflow.com/questions/432037/how-do-i-center-text-horizontally-and-vertically-in-a-textview?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa -->
+
+
+
 </RelativeLayout>
 
