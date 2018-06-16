@@ -57,6 +57,16 @@ implements TrailerAdapter.TrailerClickListener {
     ReviewAdapter reviewAdapter = null;
     private RecyclerView reviewRecyclerView = null;
 
+    //these declarations are used to store & retrieve
+    // the trailers and reviews adapters' position
+    // to restore position after rotations
+    LinearLayoutManager layoutManager;
+    int trailerPosition, reviewPosition;
+    public static int scrollX = 0;
+    public static int scrollY = 0;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,6 +168,37 @@ implements TrailerAdapter.TrailerClickListener {
     }
 
 
+    @Override
+    protected void onPause(){
+        super.onPause();
+        //save current trailers' adapter position to retrieve after rotation
+        layoutManager = (LinearLayoutManager) trailerRecyclerView.getLayoutManager();
+        trailerPosition = layoutManager.findFirstVisibleItemPosition();
+
+        //save current reviews' adapter position to retrieve after rotation
+        layoutManager = (LinearLayoutManager) reviewRecyclerView.getLayoutManager();
+        reviewPosition = layoutManager.findFirstVisibleItemPosition();
+
+        //scrollX = scrollView.getScrollX();
+        //scrollY = scrollView.getScrollY();
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("trailerPosition", trailerPosition);
+        outState.putInt("reviewPosition", reviewPosition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        trailerPosition = savedInstanceState.getInt("trailerPosition");
+        reviewPosition = savedInstanceState.getInt("reviewPosition");
+    }
+
+
     public void getTrailersData(int movieId){
 
         //retrieve the key for the TMDb service
@@ -189,6 +230,10 @@ implements TrailerAdapter.TrailerClickListener {
             public void onResponse(Call<TrailerResponse> call, Response<TrailerResponse> response) {
                 trailerList = response.body().getResults();
                 trailerAdapter.addData(trailerList);
+
+                //restore previously visible position (before a rotation or detail view)
+                layoutManager = (LinearLayoutManager) trailerRecyclerView.getLayoutManager();
+                layoutManager.scrollToPositionWithOffset(trailerPosition, 0);
             }
 
             @Override
@@ -213,6 +258,9 @@ implements TrailerAdapter.TrailerClickListener {
             public void onResponse(Call<ReviewResponse> call, Response<ReviewResponse> response) {
                 reviewList = response.body().getResults();
                 reviewAdapter.addData(reviewList);
+
+                layoutManager = (LinearLayoutManager) reviewRecyclerView.getLayoutManager();
+                layoutManager.scrollToPosition(reviewPosition);
 
                 Log.d(TAG, "Number of REVIEWS received: " + reviewList.size());
             }

@@ -101,6 +101,7 @@ implements MainAdapter.MovieClickListener {
     @Override
     protected void onPause() {
         super.onPause();
+
         //save current recyclerView position
         manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
         int firstItem = manager.findFirstVisibleItemPosition();
