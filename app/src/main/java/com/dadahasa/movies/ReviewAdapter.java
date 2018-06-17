@@ -22,8 +22,8 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
     //view for each review in the recyclerview
     //A review item has an author and the actual review notes.
-    private TextView authorTxView;
-    private TextView reviewTxView;
+    //private TextView authorTxView;
+    //private TextView reviewTxView;
 
 
     //Constructor called by detail activity to pass the data retrieved and attach the listener
@@ -35,6 +35,12 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
     //A view holder object will display a single item to view
     // (creating new views or reusing hidden ones)
     public class ViewHolder extends RecyclerView.ViewHolder{
+
+        //view for each review in the recyclerview
+        //A review item has an author and the actual review notes.
+        private TextView authorTxView;
+        private TextView reviewTxView;
+
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -65,8 +71,8 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         Review review =  reviewList.get(position);
-        authorTxView.setText(review.getAuthor());
-        reviewTxView.setText(review.getContent());
+        viewHolder.authorTxView.setText(review.getAuthor());
+        viewHolder.reviewTxView.setText(review.getContent());
     }
 
 

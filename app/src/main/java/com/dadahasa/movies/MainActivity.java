@@ -82,6 +82,7 @@ implements MainAdapter.MovieClickListener {
         if (isFirstRun){
             //reset sharedPreferences when the app starts for the first time
             editor.putInt("SCROLL_POS", 0);
+            editor.putInt("PREVIOUS_MOVIE", -1);
             editor.apply();
             isFirstRun = false;
         }
@@ -151,6 +152,7 @@ implements MainAdapter.MovieClickListener {
 
                 //since we re-sorted, display from the top,  view index 0
                 editor.putInt("SCROLL_POS", 0);
+                editor.putInt("PREVIOUS_MOVIE", 0);
                 editor.apply();
 
                 //grab and display a new set of posters sort-by the new criteria

@@ -4,8 +4,8 @@
     android:orientation="horizontal"
     android:paddingTop="5dp"
     android:paddingBottom="5dp"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_width="300dp"
+    android:layout_height="120dp"
     android:background="@drawable/custom_border"
     android:layout_margin="5dp"
     >
@@ -36,7 +36,7 @@
         android:gravity="center"
         android:foregroundGravity="center"
         android:textAlignment="center"
-        android:textSize="25dip"
+        android:textSize="15dip"
         />
 <!-- https://stackoverflow.com/questions/432037/how-do-i-center-text-horizontally-and-vertically-in-a-textview?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa -->
 

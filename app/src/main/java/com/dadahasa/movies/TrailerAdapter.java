@@ -20,8 +20,6 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
 
     //private Context context;
 
-    //view for each item in the recyclerview
-    private TextView mTextView;
 
 
     //interface for the click listener
@@ -41,7 +39,8 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
     // (creating new views or reusing hidden ones)
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        //private Context context;
+        //view for each item in the recyclerview
+        private TextView mTextView;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -71,7 +70,6 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
         int layoutIdForText = R.layout.trailer_item;
         LayoutInflater inflater = LayoutInflater.from(context);
         boolean shouldAttachToParentImmediately = false;
-
         View view = inflater.inflate(layoutIdForText, viewGroup, shouldAttachToParentImmediately);
         return new ViewHolder(view);
     }
@@ -83,7 +81,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         Trailer trailer =  trailerList.get(position);
-        mTextView.setText(trailer.getName());
+        viewHolder.mTextView.setText(trailer.getName() + "\n" + trailer.getKey());
     }
 
 

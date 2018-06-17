@@ -8,8 +8,9 @@
         android:id="@+id/author_txv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="30dp"
-        android:textSize="27dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:textSize="20sp"
         android:textStyle="bold"
         />
 
@@ -17,7 +18,9 @@
         android:id="@+id/review_txv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:textSize="25dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="30dp"
+        android:textSize="20sp"
         />
 </LinearLayout>

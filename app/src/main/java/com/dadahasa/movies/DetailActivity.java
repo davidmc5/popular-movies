@@ -2,7 +2,10 @@ package com.dadahasa.movies;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.preference.PreferenceManager;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -61,9 +64,12 @@ implements TrailerAdapter.TrailerClickListener {
     // the trailers and reviews adapters' position
     // to restore position after rotations
     LinearLayoutManager layoutManager;
-    int trailerPosition, reviewPosition;
-    public static int scrollX = 0;
+    int trailerPosition=0, reviewPosition = 0;
     public static int scrollY = 0;
+    private NestedScrollView scrollView;
+
+    private SharedPreferences pref;
+    private int previousMovieID = 0;
 
 
 
@@ -80,6 +86,8 @@ implements TrailerAdapter.TrailerClickListener {
         mOverview = findViewById(R.id.overview_tv);
         mPoster = findViewById(R.id.poster_tv);
 
+        pref =  PreferenceManager.getDefaultSharedPreferences(this);
+
         //retrieve the intent extras
         Intent intentThatStartedThisActivity = getIntent();
         if (intentThatStartedThisActivity.hasExtra("MOVIE")) {
@@ -89,8 +97,19 @@ implements TrailerAdapter.TrailerClickListener {
         Gson gson = new Gson();
         Movie movieClicked = gson.fromJson(movieJson, Movie.class);
 
-        //movie id for trailers
+        //movie id for trailers and reviews
         movieId = movieClicked.getId();
+
+        //This is needed (and only used) to preserve movie and scroll positions during screen rotations
+        if (savedInstanceState != null) {
+            //On rotation the movie selected wil always be the same as previous
+            //restore previous scroll positions
+            trailerPosition = savedInstanceState.getInt("trailerPosition");
+            reviewPosition = savedInstanceState.getInt("reviewPosition");
+            scrollY = savedInstanceState.getInt("scrollY");
+        }
+
+        //Set the activity views
 
         //title
         mTitle.setText(movieClicked.getTitle());
@@ -122,6 +141,8 @@ implements TrailerAdapter.TrailerClickListener {
         //Retrieve trailers AND reviews from API and place them into trailerList and reviewList.
         getTrailersData(movieId);
 
+        //Bind the updated trailerList and reviewList to the recyclerview adapters
+
         //TRAILERS
         //********
 
@@ -129,11 +150,10 @@ implements TrailerAdapter.TrailerClickListener {
         trailerRecyclerView = findViewById(R.id.trailers_recycler_view);
         trailerRecyclerView.setHasFixedSize(true);
 
-
         //use linearLayout Manager
         trailerRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false ));
 
-        //set recyclerView with the adapter and click listener
+        //set recyclerView with the adapter and click listener and bind the trailerList data
         if (trailerAdapter == null) {
             trailerAdapter = new TrailerAdapter(trailerList, this);
             trailerRecyclerView.setAdapter(trailerAdapter);
@@ -145,57 +165,80 @@ implements TrailerAdapter.TrailerClickListener {
         // Set the reviews' recycler view
         reviewRecyclerView = findViewById(R.id.reviews_recycler_view);
         reviewRecyclerView.setHasFixedSize(true);
-
+        reviewRecyclerView.setNestedScrollingEnabled(false);
 
         //use linearLayout Manager
         reviewRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false ));
 
-        //set recyclerView with the adapter and click listener
+        //set recyclerView with the adapter and click listener and bind the reviewList data
         if (reviewAdapter == null) {
             reviewAdapter = new ReviewAdapter(reviewList);
             reviewRecyclerView.setAdapter(reviewAdapter);
         }
 
-
-
-        //*************************************************************
-
-        //This is to flag main activity after returning from  a rotation/onCreate
+        //This is to flag main activity after returning from  a rotation/onCreate...
         // to set the new recreated adapter to show the same movie that was clicked
         Intent returnIntent = new Intent();
         setResult(Activity.RESULT_OK, returnIntent);
-
     }
 
 
     @Override
     protected void onPause(){
         super.onPause();
-        //save current trailers' adapter position to retrieve after rotation
+        //get current trailers' adapter position to retrieve after rotation
+        //then save it on shared preferences
         layoutManager = (LinearLayoutManager) trailerRecyclerView.getLayoutManager();
-        trailerPosition = layoutManager.findFirstVisibleItemPosition();
+        trailerPosition = layoutManager.findFirstCompletelyVisibleItemPosition();
 
         //save current reviews' adapter position to retrieve after rotation
         layoutManager = (LinearLayoutManager) reviewRecyclerView.getLayoutManager();
-        reviewPosition = layoutManager.findFirstVisibleItemPosition();
+        reviewPosition = layoutManager.findFirstCompletelyVisibleItemPosition();
 
-        //scrollX = scrollView.getScrollX();
-        //scrollY = scrollView.getScrollY();
+        //record the current Y position of the scrollView for rotation
+        //it will be save on the bundle with onSaveInstanceState method
+        scrollView = findViewById(R.id.scrollViewId);
+        scrollY = scrollView.getScrollY();
+
+        previousMovieID = movieId;
+
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt("PREVIOUS_MOVIE", movieId);
+        editor.putInt("TRAILER_POSITION", trailerPosition);
+        editor.apply();
     }
 
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+        //Restore variables after clicking back to movie detail
+        previousMovieID = pref.getInt("PREVIOUS_MOVIE", 0);
+        trailerPosition = pref.getInt("TRAILER_POSITION", 0);
+
+        if (movieId != previousMovieID) {
+            scrollY = 0;
+            trailerPosition = 0;
+            reviewPosition = 0;
+        }
+    }
+
+    //The next two methods are only called during rotations
+    //or only the very first time a movie is clicked!
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("trailerPosition", trailerPosition);
         outState.putInt("reviewPosition", reviewPosition);
+        outState.putInt("scrollY", scrollY);
+        outState.putInt("previousMovieID", movieId);
     }
-
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         trailerPosition = savedInstanceState.getInt("trailerPosition");
         reviewPosition = savedInstanceState.getInt("reviewPosition");
+        scrollY = savedInstanceState.getInt("scrollY");
     }
 
 
@@ -217,7 +260,6 @@ implements TrailerAdapter.TrailerClickListener {
         //Create an instance of retrofit API service to place the calls
         MovieApiService movieApiService = retrofit.create(MovieApiService.class);
 
-
         //GET TRAILERS
         //declare the variable to get trailer data
         Call<TrailerResponse> call;
@@ -234,6 +276,7 @@ implements TrailerAdapter.TrailerClickListener {
                 //restore previously visible position (before a rotation or detail view)
                 layoutManager = (LinearLayoutManager) trailerRecyclerView.getLayoutManager();
                 layoutManager.scrollToPositionWithOffset(trailerPosition, 0);
+                Log.d(TAG, "TRAILERS RECEIVED -------------->: " + trailerList.size());
             }
 
             @Override
@@ -248,9 +291,7 @@ implements TrailerAdapter.TrailerClickListener {
         //declare the variable to get review data
         Call<ReviewResponse> reviews;
 
-
-        //Get the Reviews
-        //Get the trailers' data into an array of Trailer objects according to our data model
+        //Get the Reviews' data into an array of Review objects according to our data model
         reviews = movieApiService.getReviews(movieId, API_KEY);
         reviews.enqueue(new Callback<ReviewResponse>() {
 
@@ -259,16 +300,27 @@ implements TrailerAdapter.TrailerClickListener {
                 reviewList = response.body().getResults();
                 reviewAdapter.addData(reviewList);
 
+                //restore Reviews scroll position
                 layoutManager = (LinearLayoutManager) reviewRecyclerView.getLayoutManager();
                 layoutManager.scrollToPosition(reviewPosition);
 
-                Log.d(TAG, "Number of REVIEWS received: " + reviewList.size());
+
+                //since we now have retrieved and laid out all the data, we can restore
+                // the original scroll position
+                scrollView = findViewById(R.id.scrollViewId);
+                scrollView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        scrollView.scrollTo(0, scrollY);
+                        //scrollView.scrollTo(0, 0);
+                    }
+                });
+                //Log.d(TAG, "Number of REVIEWS received: " + reviewList.size());
             }
 
             @Override
             public void onFailure(Call<ReviewResponse> call, Throwable throwable) {
-                //Log.e(TAG, throwable.toString());
-                //noData();
+                Log.e(TAG, throwable.toString());
             }
         });
     }
