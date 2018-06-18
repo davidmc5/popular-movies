@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +26,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import okhttp3.HttpUrl;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -327,11 +329,34 @@ implements TrailerAdapter.TrailerClickListener {
 
     @Override
     public void onTrailerClick(int clickedTrailerIndex) {
+
+        //retrieve trailer
+        Trailer trailer =  trailerList.get(clickedTrailerIndex);
+        String trailerKey = trailer.getKey();
+
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("https")
+                .authority("www.youtube.com")
+                .appendPath("watch")
+                .appendQueryParameter("v", trailerKey);
+
+        String trailerUrl = builder.build().toString();
+        Uri trailerWebpage = Uri.parse(trailerUrl);
+        Intent webIntent = new Intent(Intent.ACTION_VIEW, trailerWebpage);
+        startActivity(webIntent);
+
         // Show a Toast when an item is clicked, displaying that item number that was clicked
-        String toastMessage = "Item #" + clickedTrailerIndex + " clicked.";
+        //String toastMessage = "Item #" + clickedTrailerIndex + " clicked.";
+        /*
+        String toastMessage = "URL = " + trailerUrl;
         Toast mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT);
         mToast.show();
+        */
+
+
 
     }
+
+
 
 }
