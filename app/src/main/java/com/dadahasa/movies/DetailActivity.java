@@ -14,7 +14,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dadahasa.movies.model.Movie;
 import com.dadahasa.movies.model.Review;
@@ -26,7 +25,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import okhttp3.HttpUrl;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -141,7 +139,7 @@ implements TrailerAdapter.TrailerClickListener {
 
         //*************************************************************
         //Retrieve trailers AND reviews from API and place them into trailerList and reviewList.
-        getTrailersData(movieId);
+        getTrailersAndReviews(movieId);
 
         //Bind the updated trailerList and reviewList to the recyclerview adapters
 
@@ -244,7 +242,7 @@ implements TrailerAdapter.TrailerClickListener {
     }
 
 
-    public void getTrailersData(int movieId){
+    public void getTrailersAndReviews(int movieId){
 
         //retrieve the key for the TMDb service
         //the key is stored as a string in an XML file set in .gitignore
