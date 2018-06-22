@@ -13,8 +13,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <android.support.constraint.ConstraintLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
+        <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
@@ -29,10 +28,10 @@
                 android:layout_marginTop="0dp"
                 android:background="#000000"
                 android:gravity="center_vertical"
-                android:paddingStart="20dp"
                 android:paddingEnd="20dp"
-                android:textSize="30sp"
+                android:paddingStart="20dp"
                 android:textColor="#FFFFFF"
+                android:textSize="30sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -44,8 +43,7 @@
                 android:layout_height="wrap_content"
                 android:scaleType="centerInside"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/title_tv"
-                />
+                app:layout_constraintTop_toBottomOf="@+id/title_tv" />
 
 
             <TextView
@@ -74,19 +72,35 @@
                 app:layout_constraintTop_toBottomOf="@+id/releaseYear_tv" />
 
 
+            <CheckBox
+                android:id="@+id/favorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+                android:background="@android:color/transparent"
+                android:button="@android:drawable/btn_star"
+                android:contentDescription="My Favorite"
+                android:gravity="start"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                android:textSize="30sp"
+                app:layout_constraintStart_toStartOf="@+id/rating_tv"
+                app:layout_constraintTop_toBottomOf="@+id/rating_tv" />
+
+
             <TextView
                 android:id="@+id/overview_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start"
+                android:paddingBottom="20dp"
                 android:paddingEnd="20dp"
                 android:paddingStart="20dp"
                 android:paddingTop="20dp"
-                android:paddingBottom="20dp"
                 android:textSize="23sp"
-                app:layout_constraintTop_toBottomOf="@+id/poster_tv"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="parent" />
+                app:layout_constraintStart_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/poster_tv" />
 
         </android.support.constraint.ConstraintLayout>
 

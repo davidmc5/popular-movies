@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -40,8 +42,8 @@ implements TrailerAdapter.TrailerClickListener {
     private TextView mReleaseYear;
     private TextView mRating;
     private TextView mOverview;
-
     private ImageView mPoster;
+    private CheckBox mFavorite;
 
     private static Retrofit retrofit = null;
     private List<Trailer> trailerList;
@@ -85,8 +87,11 @@ implements TrailerAdapter.TrailerClickListener {
         mRating = findViewById(R.id.rating_tv) ;
         mOverview = findViewById(R.id.overview_tv);
         mPoster = findViewById(R.id.poster_tv);
+        mFavorite = findViewById(R.id.favorite);
 
         pref =  PreferenceManager.getDefaultSharedPreferences(this);
+
+
 
         //retrieve the intent extras
         Intent intentThatStartedThisActivity = getIntent();
@@ -127,6 +132,11 @@ implements TrailerAdapter.TrailerClickListener {
 
         //Overview
         mOverview.setText(movieClicked.getOverview());
+
+        // To test checkbox
+        mFavorite.setChecked(true);
+
+
 
         String image_url = IMAGE_URL_BASE_PATH + movieClicked.getPosterPath();
 
@@ -180,6 +190,22 @@ implements TrailerAdapter.TrailerClickListener {
         // to set the new recreated adapter to show the same movie that was clicked
         Intent returnIntent = new Intent();
         setResult(Activity.RESULT_OK, returnIntent);
+
+
+
+        //Favorites
+        mFavorite.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                if(mFavorite.isChecked()){
+                    System.out.println("Checked");
+                }else{
+                    System.out.println("Un-Checked");
+                }
+            }
+        });
     }
 
 
