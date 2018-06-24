@@ -57,6 +57,8 @@ implements MainAdapter.MovieClickListener {
     //Reference to the favorites database
     private Favorites mDb;
 
+    MenuItem mMenu;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,12 +146,64 @@ implements MainAdapter.MovieClickListener {
     public boolean onCreateOptionsMenu(Menu menu){
         //need to inflate the sort-by menu item to toggle its label
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.ranking, menu);
-        MenuItem mMenu = menu.findItem(R.id.sort_setting);
+
+        //inflater.inflate(R.menu.ranking, menu);
+        //MenuItem mMenu = menu.findItem(R.id.sort_setting);
+
+        inflater.inflate(R.menu.sort_by, menu);
+        mMenu = menu.findItem(R.id.myOption);
+
         mMenu.setTitle(myPreference);
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            case R.id.topRated:
+                myPreference = getString(R.string.top_rated);
+                //mMenu.setTitle(myPreference);
+                item.setChecked(true);
+                break;
+
+            case R.id.mostPopular:
+                myPreference = getString(R.string.most_popular);
+                //mMenu.setTitle(myPreference);
+                item.setChecked(true);
+                break;
+
+            case R.id.myFavorites:
+                myPreference = getString(R.string.my_favorites);
+                //mMenu.setTitle(myPreference);
+                item.setChecked(true);
+                break;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+        }
+
+        mMenu.setTitle(myPreference);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(SORT_KEY, myPreference);
+        editor.apply();
+
+        //since we re-sorted, display from the top,  view index 0
+        editor.putInt("SCROLL_POS", 0);
+        editor.putInt("PREVIOUS_MOVIE", 0);
+        editor.apply();
+
+        //grab and display a new set of posters sort-by the new criteria
+        getApiData();
+        return true;
+
+
+
+    }
+
+/*
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -182,7 +236,7 @@ implements MainAdapter.MovieClickListener {
                 return super.onOptionsItemSelected(item);
         }
     }
-
+*/
     @Override
     public void onMovieClick(int clickedMovieIndex) {
 

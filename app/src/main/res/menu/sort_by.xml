@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+
+    <item android:id="@+id/myOption"
+        android:title="@string/blank"
+        app:showAsAction="ifRoom" />
+
+
+    <group
+        android:checkableBehavior="single">
+
+        <item android:id="@+id/topRated"
+            android:title="@string/top_rated"
+            app:showAsAction="collapseActionView" />
+
+        <item android:id="@+id/mostPopular"
+            android:title="@string/most_popular"
+            app:showAsAction="collapseActionView" />
+
+        <item android:id="@+id/myFavorites"
+            android:title="@string/my_favorites"
+            app:showAsAction="collapseActionView" />
+    </group>
+
+
+</menu>
