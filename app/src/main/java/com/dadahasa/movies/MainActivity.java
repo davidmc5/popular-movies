@@ -17,8 +17,10 @@ import android.view.MenuItem;
 
 import android.widget.Toast;
 
+import com.dadahasa.movies.database.Favorites;
 import com.dadahasa.movies.model.Movie;
 import com.dadahasa.movies.model.MovieResponse;
+import com.facebook.stetho.Stetho;
 import com.google.gson.Gson;
 
 import java.util.List;
@@ -52,12 +54,25 @@ implements MainAdapter.MovieClickListener {
 
     public static final String SORT_KEY = "sortKey";
 
+    //Reference to the favorites database
+    private Favorites mDb;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //this is to manipulate sqlite with Chrome browser
+        Stetho.initialize(
+                Stetho.newInitializerBuilder(this)
+                        .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
+                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+                        .build());
+
         setContentView(R.layout.activity_main);
 
+        //Get a reference to the database instance
+        mDb = Favorites.getInstance(getApplicationContext());
 
         //set recyclerView
         mRecyclerView = findViewById(R.id.recycler_view);
@@ -78,6 +93,8 @@ implements MainAdapter.MovieClickListener {
         SharedPreferences.Editor editor = pref.edit();
         editor.putString(SORT_KEY, myPreference);
         editor.apply();
+
+
 
         if (isFirstRun){
             //reset sharedPreferences when the app starts for the first time
@@ -209,6 +226,12 @@ implements MainAdapter.MovieClickListener {
                 int clickedPos = pref.getInt("CLICKED_POS", 0);
                 editor.putInt("SCROLL_POS", clickedPos);
                 editor.apply();
+
+                if (myPreference.equals(getString(R.string.top_rated))) {
+                    movieList = mDb.favoritesDao().getFavorites();
+                    mAdapter.addData(movieList);
+
+                }
             }
         }
     }
@@ -255,6 +278,19 @@ implements MainAdapter.MovieClickListener {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
                 movieList = response.body().getResults();
+
+                //**********************************************************************
+                //**********************************************************************
+                //TEST FOR FAVORITES
+                //IF TOP RATED SELECTED, REPLACE movieList with list from database
+                if (myPreference.equals(getString(R.string.top_rated))) {
+                    movieList = mDb.favoritesDao().getFavorites();
+                }
+
+                //**********************************************************************
+                //**********************************************************************
+
+
                 mAdapter.addData(movieList);
                 Log.d(TAG, "Number of movies received: " + movieList.size());
 

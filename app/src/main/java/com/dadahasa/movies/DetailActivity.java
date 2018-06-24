@@ -17,6 +17,8 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.dadahasa.movies.database.Favorites;
+import com.dadahasa.movies.database.FavoritesDao;
 import com.dadahasa.movies.model.Movie;
 import com.dadahasa.movies.model.Review;
 import com.dadahasa.movies.model.ReviewResponse;
@@ -52,6 +54,7 @@ implements TrailerAdapter.TrailerClickListener {
 
 
     private String movieJson;
+    private Movie movieClicked;
 
     private static final String IMAGE_URL_BASE_PATH = "http://image.tmdb.org/t/p/w342//";
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -73,6 +76,8 @@ implements TrailerAdapter.TrailerClickListener {
     private SharedPreferences pref;
     private int previousMovieID = 0;
 
+    private Favorites mDb;
+
 
 
 
@@ -91,6 +96,9 @@ implements TrailerAdapter.TrailerClickListener {
 
         pref =  PreferenceManager.getDefaultSharedPreferences(this);
 
+        //Get a reference to the Room database
+        mDb = Favorites.getInstance(getApplicationContext());
+
 
 
         //retrieve the intent extras
@@ -100,7 +108,7 @@ implements TrailerAdapter.TrailerClickListener {
         }
 
         Gson gson = new Gson();
-        Movie movieClicked = gson.fromJson(movieJson, Movie.class);
+        movieClicked = gson.fromJson(movieJson, Movie.class);
 
         //movie id for trailers and reviews
         movieId = movieClicked.getId();
@@ -133,8 +141,14 @@ implements TrailerAdapter.TrailerClickListener {
         //Overview
         mOverview.setText(movieClicked.getOverview());
 
-        // To test checkbox
-        mFavorite.setChecked(true);
+        //Set the favorite flag if movie ID is on the database.
+
+        if (mDb.favoritesDao().isFavorite(movieId) == 1){
+            mFavorite.setChecked(true);
+        }else{
+            mFavorite.setChecked(false);
+        }
+
 
 
 
@@ -195,14 +209,19 @@ implements TrailerAdapter.TrailerClickListener {
 
         //Favorites
         mFavorite.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
+                mDb.favoritesDao().setFavorite(movieClicked);
                 // TODO Auto-generated method stub
                 if(mFavorite.isChecked()){
                     System.out.println("Checked");
+                    mDb.favoritesDao().setFavorite(movieClicked);
                 }else{
                     System.out.println("Un-Checked");
+                    mDb.favoritesDao().clearFavorite(movieClicked);
+                    //mAdapter.addData(movieList);
+                    //mFavorite.setChecked(true);
+
                 }
             }
         });
