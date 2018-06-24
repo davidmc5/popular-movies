@@ -198,45 +198,8 @@ implements MainAdapter.MovieClickListener {
         //grab and display a new set of posters sort-by the new criteria
         getApiData();
         return true;
-
-
-
     }
 
-/*
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-
-            case R.id.sort_setting:
-                // User clicked at the "sorted by" item. Toggle sort criteria
-                if (item.getTitle().toString().equals(getString(R.string.most_popular))) {
-                    myPreference = getString(R.string.top_rated);
-                }
-                else {
-                    myPreference = getString(R.string.most_popular);
-                }
-                item.setTitle(myPreference);
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putString(SORT_KEY, myPreference);
-                editor.apply();
-
-                //since we re-sorted, display from the top,  view index 0
-                editor.putInt("SCROLL_POS", 0);
-                editor.putInt("PREVIOUS_MOVIE", 0);
-                editor.apply();
-
-                //grab and display a new set of posters sort-by the new criteria
-                getApiData();
-                return true;
-
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-        }
-    }
-*/
     @Override
     public void onMovieClick(int clickedMovieIndex) {
 
@@ -281,7 +244,7 @@ implements MainAdapter.MovieClickListener {
                 editor.putInt("SCROLL_POS", clickedPos);
                 editor.apply();
 
-                if (myPreference.equals(getString(R.string.top_rated))) {
+                if (myPreference.equals(getString(R.string.my_favorites))) {
                     movieList = mDb.favoritesDao().getFavorites();
                     mAdapter.addData(movieList);
 
@@ -323,7 +286,7 @@ implements MainAdapter.MovieClickListener {
         //Set the sort order based on myPreference (most popular or top rated)
         if (myPreference.equals(getString(R.string.top_rated))){
             call = movieApiService.getTopRatedMovies(API_KEY);
-        }else{
+        }else {
             call = movieApiService.getPopularMovies(API_KEY);
         }
 
@@ -332,18 +295,10 @@ implements MainAdapter.MovieClickListener {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
                 movieList = response.body().getResults();
-
-                //**********************************************************************
-                //**********************************************************************
-                //TEST FOR FAVORITES
-                //IF TOP RATED SELECTED, REPLACE movieList with list from database
-                if (myPreference.equals(getString(R.string.top_rated))) {
+                //if My Favorites is selected, replace movieList with the list from database
+                if (myPreference.equals(getString(R.string.my_favorites))) {
                     movieList = mDb.favoritesDao().getFavorites();
                 }
-
-                //**********************************************************************
-                //**********************************************************************
-
 
                 mAdapter.addData(movieList);
                 Log.d(TAG, "Number of movies received: " + movieList.size());

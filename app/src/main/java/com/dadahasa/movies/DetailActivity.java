@@ -212,7 +212,7 @@ implements TrailerAdapter.TrailerClickListener {
             @Override
             public void onClick(View v) {
                 mDb.favoritesDao().setFavorite(movieClicked);
-                // TODO Auto-generated method stub
+
                 if(mFavorite.isChecked()){
                     System.out.println("Checked");
                     mDb.favoritesDao().setFavorite(movieClicked);
