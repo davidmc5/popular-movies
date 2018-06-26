@@ -2,6 +2,7 @@ package com.dadahasa.movies;
 
 
 
+import android.arch.lifecycle.LiveData;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
@@ -144,11 +145,8 @@ implements MainAdapter.MovieClickListener {
     //display as a the preference in the actionBar, and to respond to clicks
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
-        //need to inflate the sort-by menu item to toggle its label
+        //need to inflate the sort-by menu item to set its label based on the option
         MenuInflater inflater = getMenuInflater();
-
-        //inflater.inflate(R.menu.ranking, menu);
-        //MenuItem mMenu = menu.findItem(R.id.sort_setting);
 
         inflater.inflate(R.menu.sort_by, menu);
         mMenu = menu.findItem(R.id.myOption);
@@ -163,19 +161,16 @@ implements MainAdapter.MovieClickListener {
 
             case R.id.topRated:
                 myPreference = getString(R.string.top_rated);
-                //mMenu.setTitle(myPreference);
                 item.setChecked(true);
                 break;
 
             case R.id.mostPopular:
                 myPreference = getString(R.string.most_popular);
-                //mMenu.setTitle(myPreference);
                 item.setChecked(true);
                 break;
 
             case R.id.myFavorites:
                 myPreference = getString(R.string.my_favorites);
-                //mMenu.setTitle(myPreference);
                 item.setChecked(true);
                 break;
 
@@ -245,13 +240,34 @@ implements MainAdapter.MovieClickListener {
                 editor.apply();
 
                 if (myPreference.equals(getString(R.string.my_favorites))) {
-                    movieList = mDb.favoritesDao().getFavorites();
-                    mAdapter.addData(movieList);
 
+                    //movieList = mDb.favoritesDao().getFavorites();
+
+                    //mAdapter.addData(movieList);
+
+                    getFavorites();
                 }
             }
         }
     }
+
+
+    public void getFavorites(){
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                final List<Movie> favoriteList = mDb.favoritesDao().getFavorites();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateMovieList(favoriteList);
+                    }
+                });
+            }
+        });
+    }
+
 
     public void noData(){
         String toastMessage = "Data unavailable. Verify Wi-Fi/Cellular Network";
@@ -259,6 +275,14 @@ implements MainAdapter.MovieClickListener {
         mToast.show();
     }
 
+
+
+    //this is used to update the adaptor with the favorites movie list
+    // retrieved by by the database query thread.
+    public void updateMovieList(List<Movie> favList){
+        movieList = favList;
+        mAdapter.addData(movieList);
+    }
 
 
     // Method to retrieve movie database data
@@ -294,13 +318,20 @@ implements MainAdapter.MovieClickListener {
         call.enqueue(new Callback<MovieResponse>() {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
+
                 movieList = response.body().getResults();
+                mAdapter.addData(movieList);
+
+
                 //if My Favorites is selected, replace movieList with the list from database
                 if (myPreference.equals(getString(R.string.my_favorites))) {
-                    movieList = mDb.favoritesDao().getFavorites();
+                    getFavorites();
                 }
 
-                mAdapter.addData(movieList);
+                //WHY THE VALUE OF movieList HERE IS NOT THE ONE UPDATED INSIDE THE THREAD
+                //BY updateMovieList(movieList)?????
+                //mAdapter.addData(movieList);
+
                 Log.d(TAG, "Number of movies received: " + movieList.size());
 
                 //restore previously visible position (before a rotation or detail view)
@@ -315,6 +346,7 @@ implements MainAdapter.MovieClickListener {
                 noData();
             }
         });
+
     }
 }
 

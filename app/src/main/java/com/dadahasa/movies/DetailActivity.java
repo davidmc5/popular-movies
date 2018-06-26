@@ -81,6 +81,14 @@ implements TrailerAdapter.TrailerClickListener {
 
 
 
+    public void setStar(int isFavorite){
+        if (isFavorite == 1){
+            mFavorite.setChecked(true);
+        }else{
+            mFavorite.setChecked(false);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,12 +150,37 @@ implements TrailerAdapter.TrailerClickListener {
         mOverview.setText(movieClicked.getOverview());
 
         //Set the favorite flag if movie ID is on the database.
-
+/*
         if (mDb.favoritesDao().isFavorite(movieId) == 1){
             mFavorite.setChecked(true);
         }else{
             mFavorite.setChecked(false);
         }
+*/
+    //vv
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                final int isFavorite = mDb.favoritesDao().isFavorite(movieId);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setStar(isFavorite);
+                        /*
+                        if (isFavorite == 1){
+                            mFavorite.setChecked(true);
+                        }else{
+                            mFavorite.setChecked(false);
+                        }
+                        */
+
+                    }
+                });
+            }
+        });
+    //^^
+
 
 
 
