@@ -140,6 +140,18 @@ implements MainAdapter.MovieClickListener {
     }
 
 
+    public void setMenuOption(Menu menu){
+        //sets the initial selection on the options raio button
+        //depending on the sharedPreferences
+
+        if (myPreference.equals(getString(R.string.my_favorites))) {
+            menu.findItem(R.id.myFavorites).setChecked(true);
+        }else if (myPreference.equals(getString(R.string.top_rated))) {
+            menu.findItem(R.id.topRated).setChecked(true);
+        }else if (myPreference.equals(getString(R.string.most_popular))) {
+            menu.findItem(R.id.mostPopular).setChecked(true);
+        }
+    }
 
     //the following two methods are to create the sorting selector (most popular / top rated)
     //display as a the preference in the actionBar, and to respond to clicks
@@ -150,8 +162,12 @@ implements MainAdapter.MovieClickListener {
 
         inflater.inflate(R.menu.sort_by, menu);
         mMenu = menu.findItem(R.id.myOption);
-
         mMenu.setTitle(myPreference);
+
+        //set here the initial radio button.
+        setMenuOption(menu);
+
+
         return true;
     }
 
