@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dadahasa.movies.database.Favorites;
 import com.dadahasa.movies.database.FavoritesDao;
@@ -150,14 +151,6 @@ implements TrailerAdapter.TrailerClickListener {
         mOverview.setText(movieClicked.getOverview());
 
         //Set the favorite flag if movie ID is on the database.
-/*
-        if (mDb.favoritesDao().isFavorite(movieId) == 1){
-            mFavorite.setChecked(true);
-        }else{
-            mFavorite.setChecked(false);
-        }
-*/
-    //vv
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -167,22 +160,10 @@ implements TrailerAdapter.TrailerClickListener {
                     @Override
                     public void run() {
                         setStar(isFavorite);
-                        /*
-                        if (isFavorite == 1){
-                            mFavorite.setChecked(true);
-                        }else{
-                            mFavorite.setChecked(false);
-                        }
-                        */
-
                     }
                 });
             }
         });
-    //^^
-
-
-
 
 
         String image_url = IMAGE_URL_BASE_PATH + movieClicked.getPosterPath();
@@ -246,6 +227,16 @@ implements TrailerAdapter.TrailerClickListener {
             public void onClick(View v) {
                 boolean isFavorite = mFavorite.isChecked();
                 toggleFavorite(isFavorite, movieClicked);
+
+                if (isFavorite) {
+                    String toastMessage = "Added to Favorites";
+                    Toast mToast = Toast.makeText(DetailActivity.this, toastMessage, Toast.LENGTH_SHORT);
+                    mToast.show();
+                }else {
+                    String toastMessage = "Removed from Favorites";
+                    Toast mToast = Toast.makeText(DetailActivity.this, toastMessage, Toast.LENGTH_SHORT);
+                    mToast.show();
+                }
             }
         });
     }

@@ -12,10 +12,13 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dadahasa.movies.database.Favorites;
@@ -135,7 +138,10 @@ implements MainAdapter.MovieClickListener {
             editor.apply();
         }else{
             //We couldn't retrieve data
-            noData();
+            //but if favorites are empty, do not display warning
+            if (!myPreference.equals(getString(R.string.my_favorites))) {
+                noData();
+            }
         }
     }
 
@@ -166,8 +172,6 @@ implements MainAdapter.MovieClickListener {
 
         //set here the initial radio button.
         setMenuOption(menu);
-
-
         return true;
     }
 
@@ -275,6 +279,16 @@ implements MainAdapter.MovieClickListener {
                     @Override
                     public void run() {
                         updateMovieList(favoriteList);
+
+                        if (favoriteList.size() == 0){
+                            String toastMessage = "You have no favorites selected" + "\n" + "Click the Star to mark a movie as Favorite";
+                            Toast mToast = Toast.makeText(MainActivity.this, toastMessage, Toast.LENGTH_LONG);
+                            mToast.setGravity(Gravity.CENTER, 0, 0);
+                            ViewGroup group = (ViewGroup) mToast.getView();
+                            TextView messageTextView = (TextView) group.getChildAt(0);
+                            messageTextView.setTextSize(25);
+                            mToast.show();
+                        }
                     }
                 });
             }
@@ -320,7 +334,7 @@ implements MainAdapter.MovieClickListener {
         MovieApiService movieApiService = retrofit.create(MovieApiService.class);
         Call<MovieResponse> call;
 
-        //Set the sort order based on myPreference (most popular or top rated)
+        //Retrieve movies based on myPreference (most popular or top rated)
         if (myPreference.equals(getString(R.string.top_rated))){
             call = movieApiService.getTopRatedMovies(API_KEY);
         }else {
