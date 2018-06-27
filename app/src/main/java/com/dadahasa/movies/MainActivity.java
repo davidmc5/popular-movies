@@ -240,11 +240,8 @@ implements MainAdapter.MovieClickListener {
                 editor.apply();
 
                 if (myPreference.equals(getString(R.string.my_favorites))) {
-
                     //movieList = mDb.favoritesDao().getFavorites();
-
                     //mAdapter.addData(movieList);
-
                     getFavorites();
                 }
             }

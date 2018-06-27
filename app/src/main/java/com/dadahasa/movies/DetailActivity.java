@@ -240,25 +240,30 @@ implements TrailerAdapter.TrailerClickListener {
 
 
 
-        //Favorites
+        // When toggle Favorite Star Button, save or remove movie from DB
         mFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mDb.favoritesDao().setFavorite(movieClicked);
+                boolean isFavorite = mFavorite.isChecked();
+                toggleFavorite(isFavorite, movieClicked);
+            }
+        });
+    }
 
-                if(mFavorite.isChecked()){
-                    System.out.println("Checked");
+
+    public void toggleFavorite(final boolean isFavorite, final Movie movieClicked) {
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                if (isFavorite) {
                     mDb.favoritesDao().setFavorite(movieClicked);
-                }else{
-                    System.out.println("Un-Checked");
+                } else {
                     mDb.favoritesDao().clearFavorite(movieClicked);
-                    //mAdapter.addData(movieList);
-                    //mFavorite.setChecked(true);
-
                 }
             }
         });
     }
+
 
 
     @Override
